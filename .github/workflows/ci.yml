@@ -1,0 +1,84 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend .NET
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Mostrar versión de .NET
+        run: dotnet --info
+
+      - name: Restaurar dependencias
+        run: dotnet restore ServiceTrack.slnx
+
+      - name: Compilar solución
+        run: >
+          dotnet build ServiceTrack.sln
+          --configuration Release
+          --no-restore
+
+      - name: Ejecutar pruebas
+        run: >
+          dotnet test ServiceTrack.slnx
+          --configuration Release
+          --no-build
+          --verbosity normal
+
+  frontend:
+    name: Frontend Angular
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: frontend/servicetrack-web
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/servicetrack-web/package-lock.json
+
+      - name: Mostrar versiones
+        run: |
+          node --version
+          npm --version
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar frontend
+        run: npm run build
