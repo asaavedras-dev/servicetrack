@@ -41,7 +41,7 @@ jobs:
 
       - name: Compilar solución
         run: >
-          dotnet build ServiceTrack.sln
+          dotnet build ServiceTrack.slnx
           --configuration Release
           --no-restore
 
