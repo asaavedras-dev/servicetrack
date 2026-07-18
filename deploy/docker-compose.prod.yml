@@ -1,0 +1,69 @@
+name: servicetrack
+
+services:
+  servicetrack-api:
+    image: ${SERVICETRACK_API_IMAGE}
+    container_name: servicetrack-api
+
+    restart: unless-stopped
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      TZ: America/Santiago
+
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://localhost:8080/health
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+    networks:
+      - servicetrack-internal
+      - web
+      - monitoring
+
+  servicetrack-web:
+    image: ${SERVICETRACK_WEB_IMAGE}
+    container_name: servicetrack-web
+
+    restart: unless-stopped
+
+    depends_on:
+      servicetrack-api:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --tries=1
+        - --spider
+        - http://localhost/health
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - servicetrack-internal
+      - web
+      - monitoring
+
+networks:
+  servicetrack-internal:
+    name: servicetrack-internal
+    driver: bridge
+
+  web:
+    external: true
+
+  monitoring:
+    external: true
