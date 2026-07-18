@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ServiceTrack.Api/ServiceTrack.Api.csproj" />
+  <Project Path="ServiceTrack.Application/ServiceTrack.Application.csproj" />
+  <Project Path="ServiceTrack.Domain/ServiceTrack.Domain.csproj" />
+  <Project Path="ServiceTrack.Infrastructure/ServiceTrack.Infrastructure.csproj" />
+  <Project Path="ServiceTrack.Tests/ServiceTrack.Tests.csproj" />
+</Solution>
