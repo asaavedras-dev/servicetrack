@@ -1,0 +1,70 @@
+services:
+  servicetrack-api:
+    build:
+      context: ../backend
+      dockerfile: ServiceTrack.Api/Dockerfile
+
+    image: servicetrack-api:local
+    container_name: servicetrack-api
+
+    restart: unless-stopped
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+
+    ports:
+      - "8081:8080"
+
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://localhost:8080/health
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - servicetrack-network
+
+  servicetrack-web:
+    build:
+      context: ../frontend/servicetrack-web
+      dockerfile: Dockerfile
+
+    image: servicetrack-web:local
+    container_name: servicetrack-web
+
+    restart: unless-stopped
+
+    ports:
+      - "8082:80"
+
+    depends_on:
+      servicetrack-api:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --tries=1
+        - --spider
+        - http://localhost/health
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    networks:
+      - servicetrack-network
+
+networks:
+  servicetrack-network:
+    name: servicetrack-network
+    driver: bridge
